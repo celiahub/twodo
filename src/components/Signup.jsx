@@ -6,6 +6,8 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 
+const DEFAULT_GROUP_ID = '97597304-fa12-443d-a86a-58221d3b16c6';
+
 export default function Signup({ onSwitch }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,28 +18,34 @@ export default function Signup({ onSwitch }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const cleanName = name.trim();
+    const cleanEmail = email.trim();
+
+    if (!cleanName) {
+      setError('Please enter your name.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { user } = await createUserWithEmailAndPassword(
         auth,
-        email,
+        cleanEmail,
         password
       );
 
-      // ✅ 1. 写入 Firebase Auth（关键）
       await updateProfile(user, {
-        displayName: name.trim(),
+        displayName: cleanName,
       });
 
-      // ✅ 2. 写入 Firestore
       await setDoc(doc(db, 'users', user.uid), {
-        displayName: name.trim(),
-        email,
-        groupId: null,
+        displayName: cleanName,
+        email: cleanEmail,
+        groupId: DEFAULT_GROUP_ID,
         createdAt: serverTimestamp(),
       });
-
     } catch (err) {
       setError(
         err.message
