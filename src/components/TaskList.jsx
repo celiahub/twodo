@@ -1,129 +1,114 @@
-import PresenceStatus from './PresenceStatus';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   collection,
   query,
   where,
   orderBy,
   onSnapshot,
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
 } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
-import { db, auth } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
-import TaskItem from './TaskItem';
 import AddTask from './AddTask';
+import TaskItem from './TaskItem';
 
 export default function TaskList() {
   const { user, userDoc } = useAuth();
   const [tasks, setTasks] = useState([]);
-  const [groupData, setGroupData] = useState(null);
-  const [copied, setCopied] = useState(false);
+  const [presenceList, setPresenceList] = useState([]);
 
+  const groupId = userDoc?.groupId;
+
+  // ✅ 监听任务
   useEffect(() => {
-    if (!user || !userDoc?.groupId) return;
-
-    setDoc(
-      doc(db, 'presence', user.uid),
-      {
-        groupId: userDoc.groupId,
-        displayName: userDoc?.displayName || user.email || 'User',
-        online: true,
-        currentAction: 'idle',
-        lastSeen: serverTimestamp(),
-      },
-      { merge: true }
-    );
-
-    getDoc(doc(db, 'groups', userDoc.groupId)).then((snap) => {
-      if (snap.exists()) setGroupData(snap.data());
-    });
+    if (!groupId) return;
 
     const q = query(
       collection(db, 'tasks'),
-      where('groupId', '==', userDoc.groupId),
+      where('groupId', '==', groupId),
       orderBy('createdAt', 'desc')
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setTasks(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      setTasks(snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })));
     });
 
-    return () => {
-      setDoc(
-        doc(db, 'presence', user.uid),
-        {
-          online: false,
-          currentAction: 'idle',
-          lastSeen: serverTimestamp(),
-        },
-        { merge: true }
-      );
+    return () => unsubscribe();
+  }, [groupId]);
 
-      unsubscribe();
-    };
-  }, [user, userDoc?.groupId, userDoc?.displayName]);
+  // ✅ 监听在线状态
+  useEffect(() => {
+    if (!groupId) return;
 
-  const copyCode = () => {
-    if (!groupData?.inviteCode) return;
-    navigator.clipboard.writeText(groupData.inviteCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+    const q = query(
+      collection(db, 'presence'),
+      where('groupId', '==', groupId)
+    );
 
-  const pending = tasks.filter((t) => !t.done);
-  const done = tasks.filter((t) => t.done);
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setPresenceList(snapshot.docs.map((doc) => doc.data()));
+    });
+
+    return () => unsubscribe();
+  }, [groupId]);
+
+  if (!userDoc) return null;
 
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <div className="header-left">
-          <h1 className="brand-sm">Twodo</h1>
-          {groupData?.inviteCode && (
-            <button className="invite-code-btn" onClick={copyCode}>
-              {copied ? '✓ Copied!' : `Code: ${groupData.inviteCode}`}
-            </button>
-          )}
-        </div>
+    <div className="layout">
+      {/* ================= Sidebar ================= */}
+      <aside className="sidebar">
+        <h2 className="logo">Twodo</h2>
 
-        <div className="header-right">
-          <span className="username">{userDoc?.displayName}</span>
-          <button className="sign-out-btn" onClick={() => signOut(auth)}>
-            Sign out
-          </button>
-        </div>
-      </header>
+        <nav className="nav">
+          <div className="nav-item active">Dashboard</div>
+          <div className="nav-item">Tasks</div>
+          <div className="nav-item">Calendar</div>
+          <div className="nav-item">Messages</div>
+          <div className="nav-item">Settings</div>
+        </nav>
 
-      <main className="task-main">
-        <PresenceStatus groupId={userDoc?.groupId} />
-        <AddTask groupId={userDoc?.groupId} />
-
-        {pending.length > 0 && (
-          <section>
-            {pending.map((task) => (
-              <TaskItem key={task.id} task={task} />
-            ))}
-          </section>
-        )}
-
-        {done.length > 0 && (
-          <section>
-            <p className="section-label">Done</p>
-            {done.map((task) => (
-              <TaskItem key={task.id} task={task} />
-            ))}
-          </section>
-        )}
-
-        {tasks.length === 0 && (
-          <div className="empty-state">
-            <p>No tasks yet.</p>
-            <p>Add your first one above ↑</p>
+        {/* 👇 用户信息（底部） */}
+        <div className="profile">
+          <div className="avatar" />
+          <div>
+            <div className="name">
+              {userDoc.displayName || 'You'}
+            </div>
+            <div className="status">Online</div>
           </div>
-        )}
+        </div>
+      </aside>
+
+      {/* ================= Main ================= */}
+      <main className="main">
+        <div className="topbar">
+          <h1>Hello, {userDoc.displayName || 'User'}</h1>
+        </div>
+
+        {/* 👇 在线状态 */}
+        <div className="online-card">
+          {presenceList.map((p, i) => (
+            <div key={i} className="online-user">
+              <span className="dot" />
+              {p.displayName} online
+            </div>
+          ))}
+        </div>
+
+        {/* 👇 添加任务 */}
+        <AddTask groupId={groupId} />
+
+        {/* 👇 任务列表 */}
+        <div className="task-section">
+          <h3>Today</h3>
+
+          {tasks.map((task) => (
+            <TaskItem key={task.id} task={task} />
+          ))}
+        </div>
       </main>
     </div>
   );
