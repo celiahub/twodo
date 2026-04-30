@@ -5,20 +5,47 @@ import {
   where,
   orderBy,
   onSnapshot,
+  doc,
+  setDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { signOut } from 'firebase/auth';
+import { db, auth } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 import AddTask from './AddTask';
 import TaskItem from './TaskItem';
+
+function cleanName(name) {
+  if (!name) return 'User';
+  if (name.includes('@')) return name.split('@')[0];
+  return name;
+}
 
 export default function TaskList() {
   const { user, userDoc } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [presenceList, setPresenceList] = useState([]);
+  const [activeTab, setActiveTab] = useState('Dashboard');
 
   const groupId = userDoc?.groupId;
+  const myName = cleanName(userDoc?.displayName || user?.displayName || user?.email);
 
-  // ✅ 监听任务
+  useEffect(() => {
+    if (!user || !groupId) return;
+
+    setDoc(
+      doc(db, 'presence', user.uid),
+      {
+        groupId,
+        displayName: myName,
+        online: true,
+        currentAction: 'idle',
+        lastSeen: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }, [user, groupId, myName]);
+
   useEffect(() => {
     if (!groupId) return;
 
@@ -29,16 +56,12 @@ export default function TaskList() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setTasks(snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })));
+      setTasks(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     });
 
     return () => unsubscribe();
   }, [groupId]);
 
-  // ✅ 监听在线状态
   useEffect(() => {
     if (!groupId) return;
 
@@ -56,59 +79,98 @@ export default function TaskList() {
 
   if (!userDoc) return null;
 
+  const navItems = ['Dashboard', 'Tasks', 'Calendar', 'Messages', 'Settings'];
+
   return (
     <div className="layout">
-      {/* ================= Sidebar ================= */}
       <aside className="sidebar">
-        <h2 className="logo">Twodo</h2>
+        <div>
+          <h2 className="logo">Twodo</h2>
 
-        <nav className="nav">
-          <div className="nav-item active">Dashboard</div>
-          <div className="nav-item">Tasks</div>
-          <div className="nav-item">Calendar</div>
-          <div className="nav-item">Messages</div>
-          <div className="nav-item">Settings</div>
-        </nav>
+          <nav className="nav">
+            {navItems.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`nav-item ${activeTab === item ? 'active' : ''}`}
+                onClick={() => setActiveTab(item)}
+              >
+                {item}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-        {/* 👇 用户信息（底部） */}
         <div className="profile">
-          <div className="avatar" />
+          <div className="avatar">{myName[0]?.toUpperCase()}</div>
           <div>
-            <div className="name">
-              {userDoc.displayName || 'You'}
-            </div>
+            <div className="name">{myName}</div>
             <div className="status">Online</div>
           </div>
         </div>
       </aside>
 
-      {/* ================= Main ================= */}
       <main className="main">
         <div className="topbar">
-          <h1>Hello, {userDoc.displayName || 'User'}</h1>
+          <h1>
+            {activeTab === 'Dashboard'
+              ? `Hello, ${myName}`
+              : activeTab}
+          </h1>
+
+          <button className="signout" onClick={() => signOut(auth)}>
+            Sign out
+          </button>
         </div>
 
-        {/* 👇 在线状态 */}
-        <div className="online-card">
-          {presenceList.map((p, i) => (
-            <div key={i} className="online-user">
-              <span className="dot" />
-              {p.displayName} online
+        {activeTab === 'Dashboard' && (
+          <>
+            <div className="online-card">
+              {presenceList.map((p, i) => (
+                <div key={i} className="online-user">
+                  <span className="dot" />
+                  {cleanName(p.displayName)} online
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* 👇 添加任务 */}
-        <AddTask groupId={groupId} />
+            <AddTask groupId={groupId} />
 
-        {/* 👇 任务列表 */}
-        <div className="task-section">
-          <h3>Today</h3>
+            <div className="task-section">
+              <h3>Today</h3>
+              {tasks.map((task) => (
+                <TaskItem key={task.id} task={task} />
+              ))}
+            </div>
+          </>
+        )}
 
-          {tasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
-          ))}
-        </div>
+        {activeTab === 'Tasks' && (
+          <div className="task-section">
+            <h3>All Tasks</h3>
+            {tasks.map((task) => (
+              <TaskItem key={task.id} task={task} />
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'Calendar' && (
+          <div className="empty-state">
+            <p>Calendar coming soon.</p>
+          </div>
+        )}
+
+        {activeTab === 'Messages' && (
+          <div className="empty-state">
+            <p>Messages coming soon.</p>
+          </div>
+        )}
+
+        {activeTab === 'Settings' && (
+          <div className="empty-state">
+            <p>Settings coming soon.</p>
+          </div>
+        )}
       </main>
     </div>
   );
