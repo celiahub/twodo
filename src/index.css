@@ -1048,3 +1048,29 @@ input {
     overflow-wrap: anywhere;
   }
 }
+/* ===== FINAL FORCE FIX (MUST BE LAST) ===== */
+@media screen and (max-width: 768px) {
+
+  .layout {
+    display: block !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    position: static !important;
+  }
+
+  .main {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .task-row {
+    display: block !important;
+  }
+
+  .task-text {
+    word-break: break-word !important;
+  }
+
+}

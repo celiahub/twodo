@@ -28,7 +28,9 @@ export default function TaskList() {
   const [activeTab, setActiveTab] = useState('Dashboard');
 
   const groupId = userDoc?.groupId;
-  const myName = cleanName(userDoc?.displayName || user?.displayName || user?.email);
+  const myName = cleanName(
+    userDoc?.displayName || user?.displayName || user?.email
+  );
 
   useEffect(() => {
     if (!user || !groupId) return;
@@ -83,6 +85,10 @@ export default function TaskList() {
 
   return (
     <div className="layout">
+      <div style={{ color: 'red', fontSize: '30px', fontWeight: 800 }}>
+        MOBILE TEST
+      </div>
+
       <aside className="sidebar">
         <div>
           <h2 className="logo">Twodo</h2>
@@ -113,9 +119,7 @@ export default function TaskList() {
       <main className="main">
         <div className="topbar">
           <h1>
-            {activeTab === 'Dashboard'
-              ? `Hello, ${myName}`
-              : activeTab}
+            {activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}
           </h1>
 
           <button className="signout" onClick={() => signOut(auth)}>
