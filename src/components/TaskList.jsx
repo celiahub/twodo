@@ -12,6 +12,7 @@ import {
 import { signOut } from 'firebase/auth';
 import { db, auth } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
+import { enablePush } from '../lib/push';
 import AddTask from './AddTask';
 import TaskItem from './TaskItem';
 
@@ -85,10 +86,6 @@ export default function TaskList() {
 
   return (
     <div className="layout">
-      <div style={{ color: 'red', fontSize: '30px', fontWeight: 800 }}>
-        MOBILE TEST
-      </div>
-
       <aside className="sidebar">
         <div>
           <h2 className="logo">Twodo</h2>
@@ -122,9 +119,19 @@ export default function TaskList() {
             {activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}
           </h1>
 
-          <button className="signout" onClick={() => signOut(auth)}>
-            Sign out
-          </button>
+          <div className="topbar-actions">
+            <button
+              type="button"
+              className="calendar-btn"
+              onClick={() => enablePush(user, groupId)}
+            >
+              Enable Notifications
+            </button>
+
+            <button className="signout" onClick={() => signOut(auth)}>
+              Sign out
+            </button>
+          </div>
         </div>
 
         {activeTab === 'Dashboard' && (
