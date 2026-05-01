@@ -48,6 +48,32 @@ function cleanName(name) {
   return name;
 }
 
+function openGoogleCalendar(task) {
+  const dateKey =
+    task.taskDate ||
+    task.createdAt?.toDate?.().toISOString().split('T')[0];
+
+  if (!dateKey) {
+    alert('This task does not have a date.');
+    return;
+  }
+
+  const startDate = dateKey.replaceAll('-', '');
+
+  const end = new Date(dateKey + 'T00:00:00');
+  end.setDate(end.getDate() + 1);
+  const endDate = end.toISOString().split('T')[0].replaceAll('-', '');
+
+  const title = encodeURIComponent(task.text || 'Twodo Task');
+  const details = encodeURIComponent(
+    `Twodo task created by ${cleanName(task.createdByName || 'User')}`
+  );
+
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDate}/${endDate}&details=${details}`;
+
+  window.open(url, '_blank');
+}
+
 export default function TaskItem({ task }) {
   const { user, userDoc } = useAuth();
   const [showComments, setShowComments] = useState(false);
@@ -289,6 +315,14 @@ export default function TaskItem({ task }) {
                   onChange={(e) => setProofFile(e.target.files[0])}
                 />
               </label>
+
+              <button
+                type="button"
+                className="calendar-btn"
+                onClick={() => openGoogleCalendar(task)}
+              >
+                Add to Google Calendar
+              </button>
 
               {proofFile && (
                 <div className="selected-proof-row">
