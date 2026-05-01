@@ -945,3 +945,106 @@ input {
     justify-content: flex-start;
   }
 }
+/* ===== Mobile Responsive Fix ===== */
+@media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .layout {
+    width: 100%;
+    min-height: 100vh;
+    display: block;
+    background: #f6f7fb;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    padding: 20px 16px 14px;
+  }
+
+  .logo {
+    font-size: 32px;
+    margin-bottom: 18px;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+    white-space: nowrap;
+  }
+
+  .profile {
+    display: none;
+  }
+
+  .main {
+    width: 100%;
+    max-width: none;
+    padding: 18px 16px 40px;
+  }
+
+  .topbar h1 {
+    font-size: 26px;
+  }
+
+  .online-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .add-task-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .add-task-form input,
+  .file-upload-btn,
+  .file-name,
+  .add-task-form button {
+    width: 100%;
+    max-width: none;
+  }
+
+  .task-item {
+    width: 100%;
+  }
+
+  .task-row {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 12px;
+  }
+
+  .task-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .task-text {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+}
