@@ -13,20 +13,34 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
+
       if (!firebaseUser) {
         setUserDoc(null);
         setLoading(false);
       }
     });
+
     return unsubAuth;
   }, []);
 
   useEffect(() => {
     if (!user) return;
-    const unsubDoc = onSnapshot(doc(db, 'users', user.uid), (snap) => {
-      setUserDoc(snap.exists() ? snap.data() : null);
-      setLoading(false);
-    });
+
+    setLoading(true);
+
+    const unsubDoc = onSnapshot(
+      doc(db, 'users', user.uid),
+      (snap) => {
+        setUserDoc(snap.exists() ? snap.data() : null);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('User doc listener error:', err);
+        setUserDoc(null);
+        setLoading(false);
+      }
+    );
+
     return unsubDoc;
   }, [user]);
 
