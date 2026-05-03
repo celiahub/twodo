@@ -15,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 import { enablePush } from '../lib/push';
 import AddTask from './AddTask';
 import TaskItem from './TaskItem';
+import DailyTracker from './DailyTracker';
 
 function cleanName(name) {
   if (!name) return 'User';
@@ -68,10 +69,7 @@ export default function TaskList() {
   useEffect(() => {
     if (!groupId) return;
 
-    const q = query(
-      collection(db, 'presence'),
-      where('groupId', '==', groupId)
-    );
+    const q = query(collection(db, 'presence'), where('groupId', '==', groupId));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setPresenceList(snapshot.docs.map((doc) => doc.data()));
@@ -115,9 +113,7 @@ export default function TaskList() {
 
       <main className="main">
         <div className="topbar">
-          <h1>
-            {activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}
-          </h1>
+          <h1>{activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}</h1>
 
           <div className="topbar-actions">
             <button
@@ -144,6 +140,8 @@ export default function TaskList() {
                 </div>
               ))}
             </div>
+
+            <DailyTracker tasks={tasks} user={user} />
 
             <AddTask groupId={groupId} />
 

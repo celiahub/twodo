@@ -1088,3 +1088,159 @@ input {
   background: var(--color-accent);
   color: white;
 }
+/* ===== Task Type Select ===== */
+.task-type-select {
+  height: 54px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  padding: 0 14px;
+  font-weight: 800;
+  color: #5b6af0;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+/* ===== Daily Route Tracker ===== */
+.daily-tracker {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 22px;
+  margin: 22px 0;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.daily-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.daily-label {
+  color: #6f8067;
+  font-weight: 900;
+  margin: 0 0 4px;
+  letter-spacing: 0.02em;
+}
+
+.daily-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #172117;
+}
+
+.daily-pill {
+  background: #eef5e9;
+  color: #6d8563;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.daily-empty {
+  background: #f8faf7;
+  color: #7b8678;
+  border-radius: 18px;
+  padding: 16px;
+  font-weight: 800;
+}
+
+.station-line {
+  display: flex;
+  align-items: center;
+  margin: 20px 0 24px;
+  padding: 10px 4px;
+}
+
+.station-wrap {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.station-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 3px solid #cfe2cf;
+  background: #ffffff;
+  color: transparent;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  transition: all 0.25s ease;
+}
+
+.station-dot.done {
+  background: #748b62;
+  border-color: #748b62;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 6px rgba(116, 139, 98, 0.14),
+    0 8px 20px rgba(116, 139, 98, 0.28);
+}
+
+.station-rail {
+  height: 8px;
+  flex: 1;
+  margin: 0 6px;
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #e8ece8 0px,
+      #e8ece8 16px,
+      #ffffff 16px,
+      #ffffff 24px
+    );
+  border: 1px solid #e1e6e1;
+}
+
+.station-rail.done {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #9b2b32 0px,
+      #9b2b32 16px,
+      #fff7f6 16px,
+      #fff7f6 24px
+    );
+  border-color: #d8b5b8;
+}
+
+.daily-mini-list {
+  display: grid;
+  gap: 10px;
+}
+
+.daily-mini-task {
+  background: #f8faf7;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #657064;
+  font-weight: 800;
+}
+
+.daily-mini-task p {
+  margin: 0;
+}
+
+.daily-mini-task.completed {
+  background: #748b62;
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(116, 139, 98, 0.22);
+}
+
+/* completed task card warm olive */
+.task-item.task-done {
+  background: #eef4ea;
+  border-color: #c8d7bf;
+}

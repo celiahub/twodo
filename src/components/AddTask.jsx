@@ -15,7 +15,12 @@ function getTodayDate() {
 }
 
 function getDisplayName(user, userDoc) {
-  return userDoc?.displayName || user?.displayName || user?.email?.split('@')[0] || 'User';
+  return (
+    userDoc?.displayName ||
+    user?.displayName ||
+    user?.email?.split('@')[0] ||
+    'User'
+  );
 }
 
 export default function AddTask({ groupId }) {
@@ -23,6 +28,7 @@ export default function AddTask({ groupId }) {
   const [text, setText] = useState('');
   const [taskDate, setTaskDate] = useState(getTodayDate());
   const [file, setFile] = useState(null);
+  const [stationType, setStationType] = useState('normal');
   const [loading, setLoading] = useState(false);
 
   const CLOUD_NAME = 'ddkzt5tan';
@@ -102,6 +108,8 @@ export default function AddTask({ groupId }) {
         text: text.trim(),
         taskDate,
         imageUrl,
+        stationType,
+        stationTypeOwner: user.uid,
         createdBy: user.uid,
         createdByName: getDisplayName(user, userDoc),
         createdAt: serverTimestamp(),
@@ -115,6 +123,7 @@ export default function AddTask({ groupId }) {
 
       setText('');
       setFile(null);
+      setStationType('normal');
       setTaskDate(getTodayDate());
       await updatePresence('idle', '');
     } catch (err) {
@@ -146,6 +155,19 @@ export default function AddTask({ groupId }) {
         disabled={loading}
       />
 
+      <select
+        value={stationType}
+        onChange={(e) => setStationType(e.target.value)}
+        disabled={loading}
+        className="task-type-select"
+        title="Only you can see this task type"
+      >
+        <option value="normal">Normal</option>
+        <option value="heart">Heart ❤️</option>
+        <option value="candy">Candy 🍬</option>
+        <option value="kiss">Kiss 💋</option>
+      </select>
+
       <label className="file-upload-btn">
         Choose file
         <input
@@ -159,9 +181,7 @@ export default function AddTask({ groupId }) {
         />
       </label>
 
-      <span className="file-name">
-        {file ? file.name : 'No file chosen'}
-      </span>
+      <span className="file-name">{file ? file.name : 'No file chosen'}</span>
 
       <button type="submit" disabled={loading || (!text.trim() && !file)}>
         {loading ? '...' : '+'}
