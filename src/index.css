@@ -1402,3 +1402,35 @@ input {
 .history-body {
   padding: 0 18px 18px;
 }
+.station-dot.done {
+  background: #34c759 !important;
+  border-color: #34c759 !important;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 8px rgba(52, 199, 89, 0.18),
+    0 12px 26px rgba(52, 199, 89, 0.35);
+}
+
+.station-rail.done {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #34c759 0px,
+      #34c759 16px,
+      #ffffff 16px,
+      #ffffff 24px
+    ) !important;
+  border-color: rgba(52, 199, 89, 0.35) !important;
+}
+
+.past-task-section {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.history-task-body {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
