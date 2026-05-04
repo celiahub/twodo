@@ -1434,3 +1434,9 @@ input {
   display: grid;
   gap: 10px;
 }
+.daily-mini-list,
+.daily-task-list-clean,
+.daily-clean-task,
+.daily-mini-task {
+  display: none !important;
+}
