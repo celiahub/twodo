@@ -19,6 +19,19 @@ function getStationIcon(type, canSeeType) {
   return '';
 }
 
+function isTaskActiveToday(task, today) {
+  const taskDate = normalizeDate(task.taskDate);
+
+  if (taskDate === today) return true;
+
+  // Repeat daily tasks continue showing after their start date.
+  if (task.repeatDaily && taskDate !== 'No date' && taskDate <= today) {
+    return true;
+  }
+
+  return false;
+}
+
 function RouteLine({ tasks, user }) {
   if (!tasks.length) return null;
 
@@ -48,9 +61,7 @@ function RouteLine({ tasks, user }) {
 export default function DailyTracker({ tasks = [], user }) {
   const today = getTodayDate();
 
-  const todayTasks = tasks.filter(
-    (task) => normalizeDate(task.taskDate) === today
-  );
+  const todayTasks = tasks.filter((task) => isTaskActiveToday(task, today));
 
   const completedCount = todayTasks.filter((task) => task.done).length;
 

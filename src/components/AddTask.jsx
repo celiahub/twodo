@@ -11,7 +11,11 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../context/AuthContext';
 
 function getTodayDate() {
-  return new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function getDisplayName(user, userDoc) {
@@ -29,6 +33,7 @@ export default function AddTask({ groupId }) {
   const [taskDate, setTaskDate] = useState(getTodayDate());
   const [file, setFile] = useState(null);
   const [stationType, setStationType] = useState('normal');
+  const [repeatDaily, setRepeatDaily] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const CLOUD_NAME = 'ddkzt5tan';
@@ -108,8 +113,12 @@ export default function AddTask({ groupId }) {
         text: text.trim(),
         taskDate,
         imageUrl,
+
+        // Daily Route / Progress Timeline
         stationType,
         stationTypeOwner: user.uid,
+        repeatDaily,
+
         createdBy: user.uid,
         createdByName: getDisplayName(user, userDoc),
         createdAt: serverTimestamp(),
@@ -124,6 +133,7 @@ export default function AddTask({ groupId }) {
       setText('');
       setFile(null);
       setStationType('normal');
+      setRepeatDaily(false);
       setTaskDate(getTodayDate());
       await updatePresence('idle', '');
     } catch (err) {
@@ -167,6 +177,16 @@ export default function AddTask({ groupId }) {
         <option value="candy">Candy 🍬</option>
         <option value="kiss">Kiss 💋</option>
       </select>
+
+      <label className="repeat-daily-toggle">
+        <input
+          type="checkbox"
+          checked={repeatDaily}
+          onChange={(e) => setRepeatDaily(e.target.checked)}
+          disabled={loading}
+        />
+        <span>Repeat daily</span>
+      </label>
 
       <label className="file-upload-btn">
         Choose file

@@ -1440,3 +1440,36 @@ input {
 .daily-mini-task {
   display: none !important;
 }
+/* Force Daily Route to show only progress timeline */
+.daily-route-card .daily-mini-list,
+.daily-route-card .daily-task-list-clean,
+.daily-route-card .daily-clean-task,
+.daily-route-card .daily-mini-task,
+.daily-route-card .daily-task-list,
+.daily-route-card .daily-task {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+.repeat-daily-toggle {
+  height: 54px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: #5b6af0;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+  white-space: nowrap;
+}
+
+.repeat-daily-toggle input {
+  width: 16px;
+  height: 16px;
+}
