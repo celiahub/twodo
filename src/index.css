@@ -1342,3 +1342,63 @@ input {
 .history-body {
   padding: 0 18px 18px;
 }
+.station-line.route-only {
+  display: flex;
+  align-items: center;
+  margin-top: 32px;
+  margin-bottom: 8px;
+}
+
+.station-dot.done {
+  background: #34c759 !important;
+  border-color: #34c759 !important;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 8px rgba(52, 199, 89, 0.18),
+    0 12px 26px rgba(52, 199, 89, 0.35);
+}
+
+.station-rail.done {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #34c759 0px,
+      #34c759 16px,
+      #ffffff 16px,
+      #ffffff 24px
+    ) !important;
+  border-color: rgba(52, 199, 89, 0.35) !important;
+}
+
+.daily-mini-list,
+.daily-task-list-clean {
+  display: none !important;
+}
+
+.daily-history {
+  margin-top: 24px;
+  display: grid;
+  gap: 12px;
+}
+
+.history-day {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.history-header {
+  width: 100%;
+  border: none;
+  background: #ffffff;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.history-body {
+  padding: 0 18px 18px;
+}

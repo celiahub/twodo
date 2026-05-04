@@ -6,6 +6,7 @@ function getTodayDate() {
 
 function formatDate(dateKey) {
   return new Date(dateKey + 'T00:00:00').toLocaleDateString('en-US', {
+    weekday: 'long',
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -48,7 +49,6 @@ function RouteLine({ tasks, user }) {
 
 export default function DailyTracker({ tasks = [], user }) {
   const [openDates, setOpenDates] = useState({});
-
   const today = getTodayDate();
 
   const tasksByDate = tasks.reduce((acc, task) => {
@@ -58,10 +58,10 @@ export default function DailyTracker({ tasks = [], user }) {
     return acc;
   }, {});
 
-  const sortedDates = Object.keys(tasksByDate).sort((a, b) => b.localeCompare(a));
-
   const todayTasks = tasksByDate[today] || [];
-  const pastDates = sortedDates.filter((date) => date !== today);
+  const pastDates = Object.keys(tasksByDate)
+    .filter((dateKey) => dateKey !== today)
+    .sort((a, b) => b.localeCompare(a));
 
   const todayDone = todayTasks.filter((task) => task.done).length;
 
@@ -81,24 +81,10 @@ export default function DailyTracker({ tasks = [], user }) {
 
         {todayTasks.length === 0 ? (
           <div className="daily-empty">
-            Add today’s tasks to build today’s route.
+            Add today’s tasks to build your route.
           </div>
         ) : (
-          <>
-            <RouteLine tasks={todayTasks} user={user} />
-
-            <div className="daily-task-list-clean">
-              {todayTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`daily-clean-task ${task.done ? 'completed' : ''}`}
-                >
-                  <span className="daily-clean-dot" />
-                  <span>{task.text}</span>
-                </div>
-              ))}
-            </div>
-          </>
+          <RouteLine tasks={todayTasks} user={user} />
         )}
       </div>
 
@@ -122,7 +108,10 @@ export default function DailyTracker({ tasks = [], user }) {
                   }))
                 }
               >
-                <span>{formatDate(dateKey)}</span>
+                <span>
+                  {isOpen ? '▾' : '▸'} {formatDate(dateKey)}
+                </span>
+
                 <strong>
                   {doneCount}/{dateTasks.length}
                 </strong>
