@@ -69,7 +69,10 @@ export default function TaskList() {
   useEffect(() => {
     if (!groupId) return;
 
-    const q = query(collection(db, 'presence'), where('groupId', '==', groupId));
+    const q = query(
+      collection(db, 'presence'),
+      where('groupId', '==', groupId)
+    );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setPresenceList(snapshot.docs.map((doc) => doc.data()));
@@ -80,7 +83,14 @@ export default function TaskList() {
 
   if (!userDoc) return null;
 
-  const navItems = ['Dashboard', 'Tasks', 'Calendar', 'Messages', 'Settings'];
+  const navItems = [
+    'Dashboard',
+    'Daily Route',
+    'Tasks',
+    'Calendar',
+    'Messages',
+    'Settings',
+  ];
 
   return (
     <div className="layout">
@@ -113,7 +123,9 @@ export default function TaskList() {
 
       <main className="main">
         <div className="topbar">
-          <h1>{activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}</h1>
+          <h1>
+            {activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}
+          </h1>
 
           <div className="topbar-actions">
             <button
@@ -141,8 +153,6 @@ export default function TaskList() {
               ))}
             </div>
 
-            <DailyTracker tasks={tasks} user={user} />
-
             <AddTask groupId={groupId} />
 
             <div className="task-section">
@@ -152,6 +162,10 @@ export default function TaskList() {
               ))}
             </div>
           </>
+        )}
+
+        {activeTab === 'Daily Route' && (
+          <DailyTracker tasks={tasks} user={user} />
         )}
 
         {activeTab === 'Tasks' && (
