@@ -1,10 +1,21 @@
 import { useState } from 'react';
 
 function getTodayDate() {
-  return new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeDate(value) {
+  if (!value) return 'No date';
+  return String(value).slice(0, 10);
 }
 
 function formatDate(dateKey) {
+  if (dateKey === 'No date') return 'No date';
+
   return new Date(dateKey + 'T00:00:00').toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -52,7 +63,7 @@ export default function DailyTracker({ tasks = [], user }) {
   const today = getTodayDate();
 
   const tasksByDate = tasks.reduce((acc, task) => {
-    const dateKey = task.taskDate || 'No date';
+    const dateKey = normalizeDate(task.taskDate);
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(task);
     return acc;
