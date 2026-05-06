@@ -16,6 +16,7 @@ import { enablePush } from '../lib/push';
 import AddTask from './AddTask';
 import TaskItem from './TaskItem';
 import DailyTracker from './DailyTracker';
+import HealthTracker from './HealthTracker';
 
 function cleanName(name) {
   if (!name) return 'User';
@@ -44,6 +45,18 @@ function formatDate(dateKey) {
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+function isTaskActiveToday(task, today) {
+  const taskDate = normalizeDate(task.taskDate);
+
+  if (taskDate === today) return true;
+
+  if (task.repeatDaily && taskDate !== 'No date' && taskDate <= today) {
+    return true;
+  }
+
+  return false;
 }
 
 export default function TaskList() {
@@ -112,24 +125,21 @@ export default function TaskList() {
   const navItems = [
     'Dashboard',
     'Daily Route',
+    'Health',
     'Tasks',
     'Calendar',
     'Messages',
     'Settings',
   ];
 
-  const todayTasks = tasks.filter(
-    (task) => normalizeDate(task.taskDate) === today
-  );
+  const todayTasks = tasks.filter((task) => isTaskActiveToday(task, today));
 
   const pastTasksByDate = tasks
-    .filter((task) => normalizeDate(task.taskDate) !== today)
+    .filter((task) => !isTaskActiveToday(task, today))
     .reduce((acc, task) => {
       const dateKey = normalizeDate(task.taskDate);
-
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(task);
-
       return acc;
     }, {});
 
@@ -222,7 +232,6 @@ export default function TaskList() {
 
         <div className="profile">
           <div className="avatar">{myName[0]?.toUpperCase()}</div>
-
           <div>
             <div className="name">{myName}</div>
             <div className="status">Online</div>
@@ -257,10 +266,13 @@ export default function TaskList() {
           <DailyTracker tasks={tasks} user={user} />
         )}
 
+        {activeTab === 'Health' && (
+          <HealthTracker groupId={groupId} user={user} />
+        )}
+
         {activeTab === 'Tasks' && (
           <div className="task-section">
             <h3>All Tasks</h3>
-
             {tasks.map((task) => (
               <TaskItem key={task.id} task={task} />
             ))}

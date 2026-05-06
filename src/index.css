@@ -1473,3 +1473,94 @@ input {
   width: 16px;
   height: 16px;
 }
+/* ===== Health Tracker ===== */
+.health-page {
+  display: grid;
+  gap: 24px;
+}
+
+.health-card {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.health-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.health-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: #172117;
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.health-box {
+  background: #f8faf7;
+  border: 1px solid #e2e8dd;
+  border-radius: 20px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.health-box h3 {
+  margin: 0 0 4px;
+  color: #5f7358;
+}
+
+.health-box input {
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  padding: 0 12px;
+  font-weight: 700;
+}
+
+.health-box small {
+  color: #7c8779;
+  font-weight: 800;
+  margin-top: -6px;
+}
+
+.health-upload {
+  height: 44px;
+  justify-content: center;
+}
+
+.health-image {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+}
+
+.health-history-body {
+  padding: 14px 18px 18px;
+  display: grid;
+  gap: 8px;
+  color: #566156;
+  font-weight: 700;
+}
+
+.health-history-body p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .health-grid {
+    grid-template-columns: 1fr;
+  }
+}

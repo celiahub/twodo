@@ -24,7 +24,6 @@ function isTaskActiveToday(task, today) {
 
   if (taskDate === today) return true;
 
-  // Repeat daily tasks continue showing after their start date.
   if (task.repeatDaily && taskDate !== 'No date' && taskDate <= today) {
     return true;
   }
@@ -60,9 +59,7 @@ function RouteLine({ tasks, user }) {
 
 export default function DailyTracker({ tasks = [], user }) {
   const today = getTodayDate();
-
   const todayTasks = tasks.filter((task) => isTaskActiveToday(task, today));
-
   const completedCount = todayTasks.filter((task) => task.done).length;
 
   return (
@@ -75,7 +72,7 @@ export default function DailyTracker({ tasks = [], user }) {
           </h2>
         </div>
 
-        <span className="daily-pill">Resets daily</span>
+        <span className="daily-pill">Today · resets daily</span>
       </div>
 
       {todayTasks.length === 0 ? (
