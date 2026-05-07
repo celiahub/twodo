@@ -59,6 +59,18 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
+function Fireworks({ active }) {
+  if (!active) return null;
+
+  return (
+    <div className="fireworks-layer">
+      {Array.from({ length: 18 }).map((_, i) => (
+        <span key={i} className={`firework-dot dot-${i + 1}`} />
+      ))}
+    </div>
+  );
+}
+
 export default function SharedMoments({ user, groupId }) {
   const [moments, setMoments] = useState([]);
   const [openDates, setOpenDates] = useState({});
@@ -70,6 +82,9 @@ export default function SharedMoments({ user, groupId }) {
 
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+
+  const [heartLit, setHeartLit] = useState(false);
+  const [fireworks, setFireworks] = useState(false);
 
   const today = getTodayDate();
 
@@ -94,6 +109,15 @@ export default function SharedMoments({ user, groupId }) {
     return () => unsubscribe();
   }, [groupId]);
 
+  const playReward = () => {
+    setHeartLit(true);
+    setFireworks(true);
+
+    setTimeout(() => {
+      setFireworks(false);
+    }, 1600);
+  };
+
   const submitMoment = async (type, text) => {
     if (!text.trim() && !imageFile) return;
     if (!user || !groupId) return;
@@ -115,6 +139,7 @@ export default function SharedMoments({ user, groupId }) {
         text: text.trim(),
         imageUrl,
         date: today,
+        reward: 'heart',
         createdAt: serverTimestamp(),
       });
 
@@ -122,6 +147,8 @@ export default function SharedMoments({ user, groupId }) {
       setReadText('');
       setHearText('');
       setImageFile(null);
+
+      playReward();
     } catch (err) {
       alert(err.message || 'Upload failed.');
     } finally {
@@ -131,8 +158,11 @@ export default function SharedMoments({ user, groupId }) {
 
   const grouped = moments.reduce((acc, item) => {
     const date = item.date || 'No date';
+
     if (!acc[date]) acc[date] = [];
+
     acc[date].push(item);
+
     return acc;
   }, {});
 
@@ -145,7 +175,8 @@ export default function SharedMoments({ user, groupId }) {
       see: {
         title: 'What I See',
         subtitle: 'Share something you noticed today.',
-        placeholder: 'Something beautiful, funny, strange, or meaningful I saw today...',
+        placeholder:
+          'Something beautiful, funny, strange, or meaningful I saw today...',
         value: seeText,
         setValue: setSeeText,
         emoji: '👀',
@@ -207,7 +238,7 @@ export default function SharedMoments({ user, groupId }) {
               onClick={() => submitMoment(type, config.value)}
               disabled={uploading}
             >
-              {uploading ? 'Sharing...' : 'Share'}
+              {uploading ? 'Sharing...' : 'Share & light heart'}
             </button>
           </div>
         )}
@@ -217,14 +248,20 @@ export default function SharedMoments({ user, groupId }) {
 
   return (
     <section className="shared-page">
-      <div className="shared-card">
+      <Fireworks active={fireworks} />
+
+      <div className="shared-card reward-card">
         <div className="health-header">
           <div>
-            <p className="daily-label">Shared Moments</p>
+            <p className="daily-label">Sharing</p>
             <h2>Sharing what I see, read, and hear</h2>
           </div>
 
-          <span className="daily-pill">Daily connection</span>
+          <span className="daily-pill">Grateful Daily</span>
+        </div>
+
+        <div className={`reward-heart ${heartLit ? 'lit' : ''}`}>
+          ❤
         </div>
 
         <div className="shared-toggle-list">
@@ -235,7 +272,7 @@ export default function SharedMoments({ user, groupId }) {
       </div>
 
       <div className="daily-history">
-        <h3>Past Shared Moments</h3>
+        <h3>Past Sharing</h3>
 
         {dates.map((dateKey) => {
           const isOpen = openDates[dateKey];

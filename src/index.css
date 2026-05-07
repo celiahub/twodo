@@ -1727,3 +1727,107 @@ input {
   width: 100%;
   justify-content: center;
 }
+/* ===== Sharing Reward ===== */
+.reward-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.reward-heart {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  margin: 0 0 18px auto;
+  background: #f3f4f2;
+  color: #c7ccc5;
+  font-size: 34px;
+  box-shadow: inset 0 0 0 1px #e1e6dd;
+  transition: all 0.35s ease;
+}
+
+.reward-heart.lit {
+  background: #fff1f3;
+  color: #ff4d6d;
+  box-shadow:
+    0 0 0 8px rgba(255, 77, 109, 0.1),
+    0 18px 42px rgba(255, 77, 109, 0.22);
+  animation: heartPop 0.7s ease;
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(0.7);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fireworks-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.firework-dot {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ff4d6d;
+  animation: fireworkBurst 1.4s ease-out forwards;
+}
+
+.firework-dot:nth-child(3n) {
+  background: #ffd166;
+}
+
+.firework-dot:nth-child(3n + 1) {
+  background: #34c759;
+}
+
+.firework-dot:nth-child(3n + 2) {
+  background: #5b6af0;
+}
+
+.dot-1 { --x: -220px; --y: -160px; }
+.dot-2 { --x: -160px; --y: -230px; }
+.dot-3 { --x: -80px; --y: -180px; }
+.dot-4 { --x: 0px; --y: -250px; }
+.dot-5 { --x: 90px; --y: -180px; }
+.dot-6 { --x: 170px; --y: -220px; }
+.dot-7 { --x: 230px; --y: -130px; }
+.dot-8 { --x: -250px; --y: -20px; }
+.dot-9 { --x: 250px; --y: 0px; }
+.dot-10 { --x: -210px; --y: 130px; }
+.dot-11 { --x: -140px; --y: 210px; }
+.dot-12 { --x: -40px; --y: 160px; }
+.dot-13 { --x: 60px; --y: 220px; }
+.dot-14 { --x: 140px; --y: 160px; }
+.dot-15 { --x: 220px; --y: 110px; }
+.dot-16 { --x: -20px; --y: -120px; }
+.dot-17 { --x: 120px; --y: -60px; }
+.dot-18 { --x: -120px; --y: 60px; }
+
+@keyframes fireworkBurst {
+  0% {
+    transform: translate(0, 0) scale(0.2);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), var(--y)) scale(1.2);
+    opacity: 0;
+  }
+}

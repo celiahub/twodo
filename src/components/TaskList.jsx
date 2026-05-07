@@ -50,14 +50,11 @@ function normalizeDate(value) {
 function formatDate(dateKey) {
   if (dateKey === 'No date') return 'No date';
 
-  return new Date(dateKey + 'T00:00:00').toLocaleDateString(
-    'en-US',
-    {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    }
-  );
+  return new Date(dateKey + 'T00:00:00').toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function isTaskActiveToday(task, today) {
@@ -65,11 +62,7 @@ function isTaskActiveToday(task, today) {
 
   if (taskDate === today) return true;
 
-  if (
-    task.repeatDaily &&
-    taskDate !== 'No date' &&
-    taskDate <= today
-  ) {
+  if (task.repeatDaily && taskDate !== 'No date' && taskDate <= today) {
     return true;
   }
 
@@ -85,13 +78,10 @@ export default function TaskList() {
   const [openDates, setOpenDates] = useState({});
 
   const groupId = userDoc?.groupId;
-
   const today = getTodayDate();
 
   const myName = cleanName(
-    userDoc?.displayName ||
-      user?.displayName ||
-      user?.email
+    userDoc?.displayName || user?.displayName || user?.email
   );
 
   useEffect(() => {
@@ -140,9 +130,7 @@ export default function TaskList() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setPresenceList(
-        snapshot.docs.map((doc) => doc.data())
-      );
+      setPresenceList(snapshot.docs.map((doc) => doc.data()));
     });
 
     return () => unsubscribe();
@@ -154,16 +142,14 @@ export default function TaskList() {
     'Dashboard',
     'Daily Route',
     'Health',
-    'Shared Moments',
+    'Sharing',
     'Tasks',
     'Calendar',
     'Messages',
     'Settings',
   ];
 
-  const todayTasks = tasks.filter((task) =>
-    isTaskActiveToday(task, today)
-  );
+  const todayTasks = tasks.filter((task) => isTaskActiveToday(task, today));
 
   const pastTasksByDate = tasks
     .filter((task) => !isTaskActiveToday(task, today))
@@ -179,8 +165,8 @@ export default function TaskList() {
       return acc;
     }, {});
 
-  const pastDates = Object.keys(pastTasksByDate).sort(
-    (a, b) => b.localeCompare(a)
+  const pastDates = Object.keys(pastTasksByDate).sort((a, b) =>
+    b.localeCompare(a)
   );
 
   const renderDashboard = () => (
@@ -202,20 +188,15 @@ export default function TaskList() {
         <h3>Today</h3>
 
         {todayTasks.length === 0 ? (
-          <div className="daily-empty">
-            No tasks for today yet.
-          </div>
+          <div className="daily-empty">No tasks for today yet.</div>
         ) : (
-          todayTasks.map((task) => (
-            <TaskItem key={task.id} task={task} />
-          ))
+          todayTasks.map((task) => <TaskItem key={task.id} task={task} />)
         )}
       </div>
 
       <div className="past-task-section">
         {pastDates.map((dateKey) => {
           const dateTasks = pastTasksByDate[dateKey];
-
           const isOpen = openDates[dateKey];
 
           return (
@@ -231,22 +212,16 @@ export default function TaskList() {
                 }
               >
                 <span>
-                  {isOpen ? '▾' : '▸'}{' '}
-                  {formatDate(dateKey)}
+                  {isOpen ? '▾' : '▸'} {formatDate(dateKey)}
                 </span>
 
-                <strong>
-                  {dateTasks.length} tasks
-                </strong>
+                <strong>{dateTasks.length} tasks</strong>
               </button>
 
               {isOpen && (
                 <div className="history-task-body">
                   {dateTasks.map((task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                    />
+                    <TaskItem key={task.id} task={task} />
                   ))}
                 </div>
               )}
@@ -268,9 +243,7 @@ export default function TaskList() {
               <button
                 key={item}
                 type="button"
-                className={`nav-item ${
-                  activeTab === item ? 'active' : ''
-                }`}
+                className={`nav-item ${activeTab === item ? 'active' : ''}`}
                 onClick={() => setActiveTab(item)}
               >
                 {item}
@@ -280,70 +253,47 @@ export default function TaskList() {
         </div>
 
         <div className="profile">
-          <div className="avatar">
-            {myName[0]?.toUpperCase()}
-          </div>
+          <div className="avatar">{myName[0]?.toUpperCase()}</div>
 
           <div>
             <div className="name">{myName}</div>
 
-            <div className="status">
-              Online
-            </div>
+            <div className="status">Online</div>
           </div>
         </div>
       </aside>
 
       <main className="main">
         <div className="topbar">
-          <h1>
-            {activeTab === 'Dashboard'
-              ? `Hello, ${myName}`
-              : activeTab}
-          </h1>
+          <h1>{activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}</h1>
 
           <div className="topbar-actions">
             <button
               type="button"
               className="calendar-btn"
-              onClick={() =>
-                enablePush(user, groupId)
-              }
+              onClick={() => enablePush(user, groupId)}
             >
               Enable Notifications
             </button>
 
-            <button
-              className="signout"
-              onClick={() => signOut(auth)}
-            >
+            <button className="signout" onClick={() => signOut(auth)}>
               Sign out
             </button>
           </div>
         </div>
 
-        {activeTab === 'Dashboard' &&
-          renderDashboard()}
+        {activeTab === 'Dashboard' && renderDashboard()}
 
         {activeTab === 'Daily Route' && (
-          <DailyTracker
-            tasks={tasks}
-            user={user}
-          />
+          <DailyTracker tasks={tasks} user={user} />
         )}
 
         {activeTab === 'Health' && (
-          <HealthTracker
-            groupId={groupId}
-            user={user}
-          />
+          <HealthTracker groupId={groupId} user={user} />
         )}
 
-        {activeTab === 'Shared Moments' && (
-          <SharedMoments
-            groupId={groupId}
-            user={user}
-          />
+        {activeTab === 'Sharing' && (
+          <SharedMoments groupId={groupId} user={user} />
         )}
 
         {activeTab === 'Tasks' && (
@@ -351,10 +301,7 @@ export default function TaskList() {
             <h3>All Tasks</h3>
 
             {tasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-              />
+              <TaskItem key={task.id} task={task} />
             ))}
           </div>
         )}
