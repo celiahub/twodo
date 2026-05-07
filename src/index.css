@@ -1564,3 +1564,15 @@ input {
     grid-template-columns: 1fr;
   }
 }
+.health-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: #5f7358;
+}
+
+.health-check input {
+  width: 16px;
+  height: 16px;
+}

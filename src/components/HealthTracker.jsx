@@ -81,6 +81,15 @@ function emptyLog(date, groupId, userId) {
       time: '',
       duration: '',
     },
+    symptoms: {
+      diarrhea: false,
+      diarrheaCount: '',
+      diarrheaTime: '',
+      headache: false,
+      musclePain: false,
+      painLevel: '',
+      notes: '',
+    },
     updatedAt: serverTimestamp(),
   };
 }
@@ -133,7 +142,6 @@ export default function HealthTracker({ groupId, user }) {
     };
 
     setTodayLog(nextLog);
-
     await setDoc(doc(db, 'healthLogs', todayId), nextLog, { merge: true });
   };
 
@@ -303,6 +311,80 @@ export default function HealthTracker({ groupId, user }) {
               }
             />
           </div>
+
+          <div className="health-box">
+            <h3>Symptoms</h3>
+
+            <label className="health-check">
+              <input
+                type="checkbox"
+                checked={todayLog.symptoms?.diarrhea || false}
+                onChange={(e) =>
+                  updateNested('symptoms', 'diarrhea', e.target.checked)
+                }
+              />
+              Diarrhea
+            </label>
+
+            <input
+              type="number"
+              placeholder="Diarrhea count"
+              value={todayLog.symptoms?.diarrheaCount || ''}
+              onChange={(e) =>
+                updateNested('symptoms', 'diarrheaCount', e.target.value)
+              }
+            />
+
+            <input
+              type="time"
+              value={todayLog.symptoms?.diarrheaTime || ''}
+              onChange={(e) =>
+                updateNested('symptoms', 'diarrheaTime', e.target.value)
+              }
+            />
+
+            <label className="health-check">
+              <input
+                type="checkbox"
+                checked={todayLog.symptoms?.headache || false}
+                onChange={(e) =>
+                  updateNested('symptoms', 'headache', e.target.checked)
+                }
+              />
+              Headache
+            </label>
+
+            <label className="health-check">
+              <input
+                type="checkbox"
+                checked={todayLog.symptoms?.musclePain || false}
+                onChange={(e) =>
+                  updateNested('symptoms', 'musclePain', e.target.checked)
+                }
+              />
+              Muscle pain
+            </label>
+
+            <input
+              type="number"
+              min="0"
+              max="10"
+              placeholder="Pain level 0-10"
+              value={todayLog.symptoms?.painLevel || ''}
+              onChange={(e) =>
+                updateNested('symptoms', 'painLevel', e.target.value)
+              }
+            />
+
+            <input
+              type="text"
+              placeholder="Notes"
+              value={todayLog.symptoms?.notes || ''}
+              onChange={(e) =>
+                updateNested('symptoms', 'notes', e.target.value)
+              }
+            />
+          </div>
         </div>
       </div>
 
@@ -335,21 +417,45 @@ export default function HealthTracker({ groupId, user }) {
                 <div className="health-history-body">
                   <p>BP: {log.bloodPressure?.value || '-'}</p>
                   <p>BP time: {log.bloodPressure?.time || '-'}</p>
+
                   <p>
                     Drinks: {log.drinks?.amount || '-'} {log.drinks?.type || ''}
                     {log.drinks?.time ? ` at ${log.drinks.time}` : ''}
                   </p>
+
                   <p>
                     Meals: Breakfast {log.meals?.breakfast || '-'} · Lunch{' '}
                     {log.meals?.lunch || '-'} · Dinner{' '}
                     {log.meals?.dinner || '-'} · Snack{' '}
                     {log.meals?.snack || '-'}
                   </p>
+
                   <p>
                     Workout: {log.workout?.content || '-'} ·{' '}
                     {log.workout?.duration || '-'} min
                     {log.workout?.time ? ` at ${log.workout.time}` : ''}
                   </p>
+
+                  <p>
+                    Symptoms: Diarrhea{' '}
+                    {log.symptoms?.diarrhea ? 'Yes' : 'No'}
+                    {log.symptoms?.diarrheaCount
+                      ? ` · ${log.symptoms.diarrheaCount} times`
+                      : ''}
+                    {log.symptoms?.diarrheaTime
+                      ? ` at ${log.symptoms.diarrheaTime}`
+                      : ''}
+                  </p>
+
+                  <p>
+                    Pain: Headache {log.symptoms?.headache ? 'Yes' : 'No'} ·
+                    Muscle pain {log.symptoms?.musclePain ? 'Yes' : 'No'}
+                    {log.symptoms?.painLevel
+                      ? ` · Level ${log.symptoms.painLevel}/10`
+                      : ''}
+                  </p>
+
+                  <p>Notes: {log.symptoms?.notes || '-'}</p>
 
                   {log.bloodPressure?.imageUrl && (
                     <img
