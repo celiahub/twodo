@@ -62,6 +62,7 @@ async function uploadToCloudinary(file) {
 export default function SharedMoments({ user, groupId }) {
   const [moments, setMoments] = useState([]);
   const [openDates, setOpenDates] = useState({});
+  const [openInput, setOpenInput] = useState('see');
 
   const [seeText, setSeeText] = useState('');
   const [readText, setReadText] = useState('');
@@ -95,13 +96,14 @@ export default function SharedMoments({ user, groupId }) {
 
   const submitMoment = async (type, text) => {
     if (!text.trim() && !imageFile) return;
+    if (!user || !groupId) return;
 
     setUploading(true);
 
     try {
       let imageUrl = '';
 
-      if (imageFile) {
+      if (type === 'see' && imageFile) {
         const compressed = await compressImage(imageFile);
         imageUrl = await uploadToCloudinary(compressed);
       }
@@ -110,7 +112,7 @@ export default function SharedMoments({ user, groupId }) {
         groupId,
         userId: user.uid,
         type,
-        text,
+        text: text.trim(),
         imageUrl,
         date: today,
         createdAt: serverTimestamp(),
@@ -129,17 +131,89 @@ export default function SharedMoments({ user, groupId }) {
 
   const grouped = moments.reduce((acc, item) => {
     const date = item.date || 'No date';
-
     if (!acc[date]) acc[date] = [];
-
     acc[date].push(item);
-
     return acc;
   }, {});
 
-  const dates = Object.keys(grouped).sort((a, b) =>
-    b.localeCompare(a)
-  );
+  const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+  const renderInputPanel = (type) => {
+    const isOpen = openInput === type;
+
+    const config = {
+      see: {
+        title: 'What I See',
+        subtitle: 'Share something you noticed today.',
+        placeholder: 'Something beautiful, funny, strange, or meaningful I saw today...',
+        value: seeText,
+        setValue: setSeeText,
+        emoji: '👀',
+      },
+      read: {
+        title: 'What I Read',
+        subtitle: 'Save a quote, article, line, or thought.',
+        placeholder: 'A sentence, quote, article, message, book line...',
+        value: readText,
+        setValue: setReadText,
+        emoji: '📖',
+      },
+      hear: {
+        title: 'What I Hear',
+        subtitle: 'Share music, sounds, words, or a voice note idea.',
+        placeholder: 'Music, sounds, words, something someone said...',
+        value: hearText,
+        setValue: setHearText,
+        emoji: '🎧',
+      },
+    }[type];
+
+    return (
+      <div className="shared-toggle-card">
+        <button
+          type="button"
+          className="shared-toggle-header"
+          onClick={() => setOpenInput(isOpen ? '' : type)}
+        >
+          <span>
+            {isOpen ? '▾' : '▸'} {config.emoji} {config.title}
+          </span>
+          <small>{config.subtitle}</small>
+        </button>
+
+        {isOpen && (
+          <div className="shared-toggle-body">
+            <textarea
+              placeholder={config.placeholder}
+              value={config.value}
+              onChange={(e) => config.setValue(e.target.value)}
+            />
+
+            {type === 'see' && (
+              <label className="file-upload-btn shared-upload-wide">
+                {imageFile ? imageFile.name : 'Upload image'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => setImageFile(e.target.files[0])}
+                />
+              </label>
+            )}
+
+            <button
+              type="button"
+              className="shared-submit"
+              onClick={() => submitMoment(type, config.value)}
+              disabled={uploading}
+            >
+              {uploading ? 'Sharing...' : 'Share'}
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <section className="shared-page">
@@ -153,70 +227,10 @@ export default function SharedMoments({ user, groupId }) {
           <span className="daily-pill">Daily connection</span>
         </div>
 
-        <div className="shared-grid">
-          <div className="shared-box">
-            <h3>What I See</h3>
-
-            <textarea
-              placeholder="Something beautiful I saw today..."
-              value={seeText}
-              onChange={(e) => setSeeText(e.target.value)}
-            />
-
-            <label className="file-upload-btn">
-              Upload image
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={(e) => setImageFile(e.target.files[0])}
-              />
-            </label>
-
-            <button
-              className="shared-submit"
-              onClick={() => submitMoment('see', seeText)}
-              disabled={uploading}
-            >
-              Share
-            </button>
-          </div>
-
-          <div className="shared-box">
-            <h3>What I Read</h3>
-
-            <textarea
-              placeholder="A sentence, quote, article..."
-              value={readText}
-              onChange={(e) => setReadText(e.target.value)}
-            />
-
-            <button
-              className="shared-submit"
-              onClick={() => submitMoment('read', readText)}
-              disabled={uploading}
-            >
-              Share
-            </button>
-          </div>
-
-          <div className="shared-box">
-            <h3>What I Hear</h3>
-
-            <textarea
-              placeholder="Music, sounds, words..."
-              value={hearText}
-              onChange={(e) => setHearText(e.target.value)}
-            />
-
-            <button
-              className="shared-submit"
-              onClick={() => submitMoment('hear', hearText)}
-              disabled={uploading}
-            >
-              Share
-            </button>
-          </div>
+        <div className="shared-toggle-list">
+          {renderInputPanel('see')}
+          {renderInputPanel('read')}
+          {renderInputPanel('hear')}
         </div>
       </div>
 
