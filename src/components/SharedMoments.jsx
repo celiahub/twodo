@@ -3,7 +3,6 @@ import {
   addDoc,
   collection,
   onSnapshot,
-  orderBy,
   query,
   serverTimestamp,
   where,
@@ -20,6 +19,8 @@ function getTodayDate() {
 }
 
 function formatDate(dateKey) {
+  if (dateKey === 'No date') return 'No date';
+
   return new Date(dateKey + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -93,18 +94,29 @@ export default function SharedMoments({ user, groupId }) {
 
     const q = query(
       collection(db, 'sharedMoments'),
-      where('groupId', '==', groupId),
-      orderBy('createdAt', 'desc')
+      where('groupId', '==', groupId)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      setMoments(
-        snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const items = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }))
-      );
-    });
+        }));
+
+        items.sort((a, b) => {
+          const aTime = a.createdAt?.seconds || 0;
+          const bTime = b.createdAt?.seconds || 0;
+          return bTime - aTime;
+        });
+
+        setMoments(items);
+      },
+      (error) => {
+        console.error('Shared moments load error:', error);
+      }
+    );
 
     return () => unsubscribe();
   }, [groupId]);
@@ -150,7 +162,8 @@ export default function SharedMoments({ user, groupId }) {
 
       playReward();
     } catch (err) {
-      alert(err.message || 'Upload failed.');
+      console.error('Shared moment save error:', err);
+      alert(err.message || 'Save failed.');
     } finally {
       setUploading(false);
     }
@@ -260,9 +273,7 @@ export default function SharedMoments({ user, groupId }) {
           <span className="daily-pill">Grateful Daily</span>
         </div>
 
-        <div className={`reward-heart ${heartLit ? 'lit' : ''}`}>
-          ❤
-        </div>
+        <div className={`reward-heart ${heartLit ? 'lit' : ''}`}>❤</div>
 
         <div className="shared-toggle-list">
           {renderInputPanel('see')}
@@ -274,54 +285,58 @@ export default function SharedMoments({ user, groupId }) {
       <div className="daily-history">
         <h3>Past Sharing</h3>
 
-        {dates.map((dateKey) => {
-          const isOpen = openDates[dateKey];
+        {dates.length === 0 ? (
+          <div className="daily-empty">No sharing yet.</div>
+        ) : (
+          dates.map((dateKey) => {
+            const isOpen = openDates[dateKey];
 
-          return (
-            <div className="history-day" key={dateKey}>
-              <button
-                type="button"
-                className="history-header"
-                onClick={() =>
-                  setOpenDates((prev) => ({
-                    ...prev,
-                    [dateKey]: !prev[dateKey],
-                  }))
-                }
-              >
-                <span>
-                  {isOpen ? '▾' : '▸'} {formatDate(dateKey)}
-                </span>
+            return (
+              <div className="history-day" key={dateKey}>
+                <button
+                  type="button"
+                  className="history-header"
+                  onClick={() =>
+                    setOpenDates((prev) => ({
+                      ...prev,
+                      [dateKey]: !prev[dateKey],
+                    }))
+                  }
+                >
+                  <span>
+                    {isOpen ? '▾' : '▸'} {formatDate(dateKey)}
+                  </span>
 
-                <strong>{grouped[dateKey].length} shared</strong>
-              </button>
+                  <strong>{grouped[dateKey].length} shared</strong>
+                </button>
 
-              {isOpen && (
-                <div className="shared-history-body">
-                  {grouped[dateKey].map((item) => (
-                    <div className="shared-history-item" key={item.id}>
-                      <div className="shared-type">
-                        {item.type === 'see' && '👀 What I See'}
-                        {item.type === 'read' && '📖 What I Read'}
-                        {item.type === 'hear' && '🎧 What I Hear'}
+                {isOpen && (
+                  <div className="shared-history-body">
+                    {grouped[dateKey].map((item) => (
+                      <div className="shared-history-item" key={item.id}>
+                        <div className="shared-type">
+                          {item.type === 'see' && '👀 What I See'}
+                          {item.type === 'read' && '📖 What I Read'}
+                          {item.type === 'hear' && '🎧 What I Hear'}
+                        </div>
+
+                        <p>{item.text}</p>
+
+                        {item.imageUrl && (
+                          <img
+                            src={item.imageUrl}
+                            alt="Shared moment"
+                            className="shared-image"
+                          />
+                        )}
                       </div>
-
-                      <p>{item.text}</p>
-
-                      {item.imageUrl && (
-                        <img
-                          src={item.imageUrl}
-                          alt="Shared moment"
-                          className="shared-image"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </section>
   );
