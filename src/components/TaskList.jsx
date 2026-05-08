@@ -23,33 +23,23 @@ import SharedMoments from './SharedMoments';
 
 function cleanName(name) {
   if (!name) return 'User';
-
-  if (name.includes('@')) {
-    return name.split('@')[0];
-  }
-
-  return name;
+  return name.includes('@') ? name.split('@')[0] : name;
 }
 
 function getTodayDate() {
   const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+    now.getDate()
+  ).padStart(2, '0')}`;
 }
 
 function normalizeDate(value) {
   if (!value) return 'No date';
-
   return String(value).slice(0, 10);
 }
 
 function formatDate(dateKey) {
   if (dateKey === 'No date') return 'No date';
-
   return new Date(dateKey + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -59,19 +49,12 @@ function formatDate(dateKey) {
 
 function isTaskActiveToday(task, today) {
   const taskDate = normalizeDate(task.taskDate);
-
   if (taskDate === today) return true;
-
-  if (task.repeatDaily && taskDate !== 'No date' && taskDate <= today) {
-    return true;
-  }
-
-  return false;
+  return task.repeatDaily && taskDate !== 'No date' && taskDate <= today;
 }
 
 export default function TaskList() {
   const { user, userDoc } = useAuth();
-
   const [tasks, setTasks] = useState([]);
   const [presenceList, setPresenceList] = useState([]);
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -110,12 +93,7 @@ export default function TaskList() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setTasks(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-      );
+      setTasks(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
 
     return () => unsubscribe();
@@ -124,13 +102,10 @@ export default function TaskList() {
   useEffect(() => {
     if (!groupId) return;
 
-    const q = query(
-      collection(db, 'presence'),
-      where('groupId', '==', groupId)
-    );
+    const q = query(collection(db, 'presence'), where('groupId', '==', groupId));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      setPresenceList(snapshot.docs.map((doc) => doc.data()));
+      setPresenceList(snapshot.docs.map((d) => d.data()));
     });
 
     return () => unsubscribe();
@@ -155,13 +130,8 @@ export default function TaskList() {
     .filter((task) => !isTaskActiveToday(task, today))
     .reduce((acc, task) => {
       const dateKey = normalizeDate(task.taskDate);
-
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-
+      if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(task);
-
       return acc;
     }, {});
 
@@ -214,7 +184,6 @@ export default function TaskList() {
                 <span>
                   {isOpen ? '▾' : '▸'} {formatDate(dateKey)}
                 </span>
-
                 <strong>{dateTasks.length} tasks</strong>
               </button>
 
@@ -254,10 +223,8 @@ export default function TaskList() {
 
         <div className="profile">
           <div className="avatar">{myName[0]?.toUpperCase()}</div>
-
           <div>
             <div className="name">{myName}</div>
-
             <div className="status">Online</div>
           </div>
         </div>
@@ -268,14 +235,6 @@ export default function TaskList() {
           <h1>{activeTab === 'Dashboard' ? `Hello, ${myName}` : activeTab}</h1>
 
           <div className="topbar-actions">
-            <button
-              type="button"
-              className="calendar-btn"
-              onClick={() => enablePush(user, groupId)}
-            >
-              Enable Notifications
-            </button>
-
             <button className="signout" onClick={() => signOut(auth)}>
               Sign out
             </button>
@@ -299,7 +258,6 @@ export default function TaskList() {
         {activeTab === 'Tasks' && (
           <div className="task-section">
             <h3>All Tasks</h3>
-
             {tasks.map((task) => (
               <TaskItem key={task.id} task={task} />
             ))}
@@ -319,8 +277,17 @@ export default function TaskList() {
         )}
 
         {activeTab === 'Settings' && (
-          <div className="empty-state">
-            <p>Settings coming soon.</p>
+          <div className="settings-card">
+            <h2>Settings</h2>
+            <p>Enable notifications on this device to receive Twodo updates.</p>
+
+            <button
+              type="button"
+              className="calendar-btn"
+              onClick={() => enablePush(user, groupId)}
+            >
+              Enable Notifications
+            </button>
           </div>
         )}
       </main>

@@ -50,8 +50,7 @@ function cleanName(name) {
 
 function openGoogleCalendar(task) {
   const dateKey =
-    task.taskDate ||
-    task.createdAt?.toDate?.().toISOString().split('T')[0];
+    task.taskDate || task.createdAt?.toDate?.().toISOString().split('T')[0];
 
   if (!dateKey) {
     alert('This task does not have a date.');
@@ -95,6 +94,7 @@ export default function TaskItem({ task }) {
 
   const uploadToCloudinary = async (file) => {
     const formData = new FormData();
+
     formData.append('file', file);
     formData.append('upload_preset', UPLOAD_PRESET);
     formData.append('folder', 'twodo/proofs');
@@ -114,6 +114,23 @@ export default function TaskItem({ task }) {
     }
 
     return data.secure_url;
+  };
+
+  const sendCompleteNotification = async () => {
+    try {
+      await fetch('/api/notifyComplete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groupId: task.groupId,
+          senderId: user.uid,
+          taskId: task.id,
+          taskText: task.text,
+        }),
+      });
+    } catch (err) {
+      console.error('Notify complete error:', err);
+    }
   };
 
   const completeTask = async () => {
@@ -140,6 +157,8 @@ export default function TaskItem({ task }) {
           ? serverTimestamp()
           : task.proofUploadedAt || null,
       });
+
+      await sendCompleteNotification();
 
       await setDoc(
         doc(db, 'presence', user.uid),
@@ -251,9 +270,11 @@ export default function TaskItem({ task }) {
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
               />
+
               <button type="button" onClick={saveEdit}>
                 Save
               </button>
+
               <button type="button" onClick={() => setIsEditing(false)}>
                 Cancel
               </button>
@@ -327,6 +348,7 @@ export default function TaskItem({ task }) {
               {proofFile && (
                 <div className="selected-proof-row">
                   <span className="proof-file-name">{proofFile.name}</span>
+
                   <button
                     type="button"
                     className="remove-proof-btn"
@@ -355,6 +377,7 @@ export default function TaskItem({ task }) {
               <button type="button" onClick={() => setIsEditing(true)}>
                 Edit
               </button>
+
               <button type="button" onClick={deleteTask}>
                 Delete
               </button>

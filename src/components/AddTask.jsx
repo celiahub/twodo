@@ -76,7 +76,10 @@ export default function AddTask({ groupId }) {
     );
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Cloudinary upload failed');
+
+    if (!res.ok) {
+      throw new Error(data.error?.message || 'Cloudinary upload failed');
+    }
 
     return data.secure_url;
   };
@@ -92,6 +95,23 @@ export default function AddTask({ groupId }) {
     }
   };
 
+  const sendTaskNotification = async (taskId, taskText) => {
+    try {
+      await fetch('/api/notifyTask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groupId,
+          senderId: user.uid,
+          taskId,
+          taskText,
+        }),
+      });
+    } catch (err) {
+      console.error('Notify task error:', err);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -99,6 +119,8 @@ export default function AddTask({ groupId }) {
     if (!groupId || !user) return;
 
     setLoading(true);
+
+    const taskText = text.trim();
 
     try {
       let imageUrl = null;
@@ -108,13 +130,12 @@ export default function AddTask({ groupId }) {
         imageUrl = await uploadToCloudinary(compressed);
       }
 
-      await addDoc(collection(db, 'tasks'), {
+      const taskRef = await addDoc(collection(db, 'tasks'), {
         groupId,
-        text: text.trim(),
+        text: taskText,
         taskDate,
         imageUrl,
 
-        // Daily Route / Progress Timeline
         stationType,
         stationTypeOwner: user.uid,
         repeatDaily,
@@ -129,6 +150,8 @@ export default function AddTask({ groupId }) {
         likes: [],
         commentCount: 0,
       });
+
+      await sendTaskNotification(taskRef.id, taskText);
 
       setText('');
       setFile(null);
